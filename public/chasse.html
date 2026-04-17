@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chasse au Trésor Pokémon 🗺️</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: #0a0a1a; min-height: 100vh; color: white; overflow-x: hidden; }
+
+    .bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+      background: linear-gradient(160deg, #0a0a1a, #1a0a2e, #0a1a2e);
+    }
+    .etoile { position: absolute; background: white; border-radius: 50%; animation: scintiller 2s infinite alternate; }
+    @keyframes scintiller { from{opacity:0.2} to{opacity:1} }
+
+    /* Header */
+    .header { text-align: center; padding: 2rem 1rem 1.5rem; }
+    .titre {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+      color: #FFD700;
+      text-shadow: 3px 3px 0 #8B6914, 0 0 30px #FFD70066;
+      line-height: 2;
+      margin-bottom: 1rem;
+    }
+    .sous-titre { color: #a78bfa; font-size: 1rem; font-weight: 700; }
+
+    /* Progression */
+    .progression {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem auto;
+      max-width: 400px;
+      padding: 0 1rem;
+    }
+    .prog-etape {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,215,0,0.3);
+      background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.4s;
+      position: relative;
+    }
+    .prog-etape.active { border-color: #FFD700; background: rgba(255,215,0,0.15); box-shadow: 0 0 15px rgba(255,215,0,0.3); }
+    .prog-etape.done { border-color: #22c55e; background: rgba(34,197,94,0.15); }
+    .prog-ligne { flex: 1; height: 2px; background: rgba(255,215,0,0.2); border-radius: 1px; }
+    .prog-ligne.done { background: #22c55e; }
+
+    /* Carte énigme */
+    .container { max-width: 600px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+    .carte-enigme {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      animation: apparaitre 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes apparaitre { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .num-enigme {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      color: #a78bfa;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .pokemon-enigme {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .pokemon-enigme img {
+      width: 100px; height: 100px;
+      filter: brightness(0);
+      transition: filter 0.8s;
+    }
+    .pokemon-enigme img.revele { filter: brightness(1); }
+    .silhouette-label { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 0.3rem; text-align: center; }
+
+    .enigme-texte {
+      flex: 1;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    /* Indices visuels */
+    .indices-visuels {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .indice-visuel {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      color: #a78bfa;
+    }
+
+    /* Réponse */
+    .zone-reponse { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .btn-reponse {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px 16px;
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-reponse:hover { border-color: #FFD700; background: rgba(255,215,0,0.1); transform: translateY(-2px); }
+    .btn-reponse.correct { border-color: #22c55e; background: rgba(34,197,94,0.2); color: #22c55e; }
+    .btn-reponse.incorrect { border-color: #ef4444; background: rgba(239,68,68,0.1); animation: shake 0.3s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+    /* Message succès */
+    .succes {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: rgba(34,197,94,0.1);
+      border: 2px solid #22c55e;
+      border-radius: 16px;
+      text-align: center;
+      animation: apparaitre 0.5s ease;
+    }
+    .succes-emoji { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+    .succes-texte { font-size: 1rem; font-weight: 900; color: #22c55e; margin-bottom: 0.5rem; }
+    .succes-detail { font-size: 0.9rem; color: #e2e8f0; line-height: 1.6; }
+
+    /* Carte indice physique */
+    .carte-physique {
+      display: none;
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(109,40,217,0.1));
+      border: 2px solid #8b5cf6;
+      border-radius: 24px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      animation: apparaitre 0.6s ease;
+    }
+    .carte-physique .titre-carte {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      color: #a78bfa;
+      margin-bottom: 1rem;
+    }
+    .carte-physique .indice-texte {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: white;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .carte-physique .emoji-indice { font-size: 3rem; display: block; margin-bottom: 0.8rem; }
+    .carte-physique .defi {
+      background: rgba(255,215,0,0.08);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #FFD700;
+      font-weight: 700;
+    }
+
+    /* Trésor final */
+    .tresor-final {
+      display: none;
+      text-align: center;
+      padding: 2.5rem 2rem;
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,107,53,0.1));
+      border: 3px solid #FFD700;
+      border-radius: 24px;
+      animation: apparaitre 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .tresor-emoji { font-size: 4rem; display: block; margin-bottom: 1rem; animation: pulse 1s infinite alternate; }
+    @keyframes pulse { from{transform:scale(1)} to{transform:scale(1.1)} }
+    .tresor-titre {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.9rem;
+      color: #FFD700;
+      text-shadow: 2px 2px 0 #8B6914;
+      line-height: 2;
+      margin-bottom: 1rem;
+    }
+    .tresor-texte { font-size: 1rem; color: #e2e8f0; line-height: 1.7; }
+
+    /* Bouton suivant */
+    .btn-suivant {
+      display: none;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #1a1a2e;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: transform 0.2s;
+    }
+    .btn-suivant:hover { transform: translateY(-3px); }
+
+    /* Lien retour */
+    .lien-retour {
+      display: block;
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-top: 2rem;
+      transition: color 0.2s;
+    }
+    .lien-retour:hover { color: rgba(255,255,255,0.6); }
+  </style>
+</head>
+<body>
+
+<div class="bg" id="bg"></div>
+
+<div class="header">
+  <div class="titre">🗺️ Chasse au Trésor<br>Pokémon !</div>
+  <div class="sous-titre">Résous les énigmes pour trouver le trésor de Léandre !</div>
+</div>
+
+<!-- Barre de progression -->
+<div class="progression">
+  <div class="prog-etape active" id="prog-1">1</div>
+  <div class="prog-ligne" id="ligne-1"></div>
+  <div class="prog-etape" id="prog-2">2</div>
+  <div class="prog-ligne" id="ligne-2"></div>
+  <div class="prog-etape" id="prog-3">3</div>
+  <div class="prog-ligne" id="ligne-3"></div>
+  <div class="prog-etape" id="prog-4">🏠</div>
+  <div class="prog-ligne" id="ligne-4"></div>
+  <div class="prog-etape" id="prog-5">🏠</div>
+  <div class="prog-ligne" id="ligne-5"></div>
+  <div class="prog-etape" id="prog-6">🏆</div>
+</div>
+
+<div class="container">
+
+  <!-- ÉNIGME 1 : Pikachu -->
+  <div class="carte-enigme" id="enigme-1">
+    <div class="num-enigme">⚡ Énigme 1 sur 3 — Sur le site</div>
+    <div class="pokemon-enigme">
+      <div>
+        <img id="img-1" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pokemon">
+        <div class="silhouette-label">Qui suis-je ?</div>
+      </div>
+      <div class="enigme-texte">
+        Je suis le Pokémon le plus célèbre du monde ! 🌟<br><br>
+        Mes joues sont roses et rondes.<br>
+        Quand je suis content, je lance des <strong style="color:#F7D02C">éclairs ⚡</strong>.<br>
+        Je suis le meilleur ami de Sacha !
+      </div>
+    </div>
+    <div class="indices-visuels">
+      <span class="indice-visuel">⚡ Type Électrik</span>
+      <span class="indice-visuel">🟡 Couleur jaune</span>
+      <span class="indice-visuel">🐭 Ressemble à une souris</span>
+    </div>
+    <div class="zone-reponse">
+      <button class="btn-reponse" onclick="repondre(1, 'Bulbizarre', this)">🌿 Bulbizarre</button>
+      <button class="btn-reponse" onclick="repondre(1, 'Pikachu', this)">⚡ Pikachu</button>
+      <button class="btn-reponse" onclick="repondre(1, 'Salamèche', this)">🔥 Salamèche</button>
+      <button class="btn-reponse" onclick="repondre(1, 'Mew', this)">🔮 Mew</button>
+    </div>
+    <div class="succes" id="succes-1">
+      <span class="succes-emoji">⚡</span>
+      <div class="succes-texte">Bravo ! C'est Pikachu !</div>
+      <div class="succes-detail">Pikachu est fier de toi, Dresseur ! Tu peux passer à l'énigme suivante !</div>
+      <button class="btn-suivant" id="btn-2" onclick="afficherEnigme(2)">Énigme suivante ➡️</button>
+    </div>
+  </div>
+
+  <!-- ÉNIGME 2 : Dracofeu -->
+  <div class="carte-enigme" id="enigme-2" style="display:none">
+    <div class="num-enigme">🔥 Énigme 2 sur 3 — Sur le site</div>
+    <div class="pokemon-enigme">
+      <div>
+        <img id="img-2" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png" alt="Pokemon">
+        <div class="silhouette-label">Qui suis-je ?</div>
+      </div>
+      <div class="enigme-texte">
+        Je suis un grand dragon orange qui vole dans le ciel ! 🐉<br><br>
+        J'ai des ailes immenses et je crache des <strong style="color:#FF6B35">flammes 🔥</strong>.<br>
+        Je suis la dernière évolution de Salamèche.<br>
+        Les dresseurs me craignent et m'admirent !
+      </div>
+    </div>
+    <div class="indices-visuels">
+      <span class="indice-visuel">🔥 Type Feu</span>
+      <span class="indice-visuel">🟠 Couleur orange</span>
+      <span class="indice-visuel">🐉 C'est un dragon</span>
+    </div>
+    <div class="zone-reponse">
+      <button class="btn-reponse" onclick="repondre(2, 'Dracofeu', this)">🔥 Dracofeu</button>
+      <button class="btn-reponse" onclick="repondre(2, 'Ronflex', this)">😴 Ronflex</button>
+      <button class="btn-reponse" onclick="repondre(2, 'Léviator', this)">🌊 Léviator</button>
+      <button class="btn-reponse" onclick="repondre(2, 'Électhor', this)">⚡ Électhor</button>
+    </div>
+    <div class="succes" id="succes-2">
+      <span class="succes-emoji">🔥</span>
+      <div class="succes-texte">Excellent ! C'est Dracofeu !</div>
+      <div class="succes-detail">Tu es un vrai Dresseur ! Une dernière énigme sur le site et ensuite la chasse continue dans la vraie vie !</div>
+      <button class="btn-suivant" id="btn-3" onclick="afficherEnigme(3)">Dernière énigme ➡️</button>
+    </div>
+  </div>
+
+  <!-- ÉNIGME 3 : Mew -->
+  <div class="carte-enigme" id="enigme-3" style="display:none">
+    <div class="num-enigme">🔮 Énigme 3 sur 3 — Sur le site</div>
+    <div class="pokemon-enigme">
+      <div>
+        <img id="img-3" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png" alt="Pokemon">
+        <div class="silhouette-label">Qui suis-je ?</div>
+      </div>
+      <div class="enigme-texte">
+        Je suis le Pokémon le plus rare et le plus mystérieux ! ✨<br><br>
+        Je suis tout petit et tout <strong style="color:#F95587">rose 🌸</strong>.<br>
+        Je peux apprendre TOUTES les attaques du monde.<br>
+        On dit que je contiens l'ADN de tous les Pokémon !
+      </div>
+    </div>
+    <div class="indices-visuels">
+      <span class="indice-visuel">🔮 Type Psy</span>
+      <span class="indice-visuel">🌸 Couleur rose</span>
+      <span class="indice-visuel">✨ Très rare</span>
+    </div>
+    <div class="zone-reponse">
+      <button class="btn-reponse" onclick="repondre(3, 'Mewtwo', this)">😈 Mewtwo</button>
+      <button class="btn-reponse" onclick="repondre(3, 'Clefairy', this)">⭐ Mélofée</button>
+      <button class="btn-reponse" onclick="repondre(3, 'Mew', this)">🔮 Mew</button>
+      <button class="btn-reponse" onclick="repondre(3, 'Evoli', this)">🦊 Évoli</button>
+    </div>
+    <div class="succes" id="succes-3">
+      <span class="succes-emoji">🔮</span>
+      <div class="succes-texte">Incroyable ! C'est Mew !</div>
+      <div class="succes-detail">Tu as résolu les 3 énigmes du site ! La chasse continue maintenant dans l'appartement... Lis bien l'indice ci-dessous !</div>
+      <button class="btn-suivant" id="btn-4" onclick="afficherIndice(1)">Voir le 1er indice 🏠</button>
+    </div>
+  </div>
+
+  <!-- INDICE PHYSIQUE 1 -->
+  <div class="carte-physique" id="indice-physique-1">
+    <div class="titre-carte">🏠 Indice physique 1 — Dans l'appartement</div>
+    <span class="emoji-indice">❄️</span>
+    <div class="indice-texte">
+      "Je suis froid comme la glace et je garde la nourriture au frais.<br>
+      Les Pokémon adorent les Pokéballs... et moi j'adore les œufs !<br>
+      <strong style="color:#FFD700">Cherche derrière moi ou sous moi !</strong>"
+    </div>
+    <div class="defi">
+      ⚡ Défi Pokémon : Avant d'aller chercher, tout le groupe doit crier<br>
+      <strong>"PIKA PIKA !"</strong> le plus fort possible ! 😄
+    </div>
+    <button class="btn-suivant" style="display:block;margin-top:1rem" onclick="afficherIndice(2)">On a trouvé ! Indice suivant ➡️</button>
+  </div>
+
+  <!-- INDICE PHYSIQUE 2 -->
+  <div class="carte-physique" id="indice-physique-2">
+    <div class="titre-carte">🏠 Indice physique 2 — Dans l'appartement</div>
+    <span class="emoji-indice">📚</span>
+    <div class="indice-texte">
+      "Je suis rempli de livres et d'histoires.<br>
+      Les Pokémon lisent-ils des livres ? Peut-être...<br>
+      <strong style="color:#FFD700">Cherche derrière les livres ou dans les tiroirs près de moi !</strong>"
+    </div>
+    <div class="defi">
+      🔥 Défi Pokémon : Tout le monde doit faire semblant d'être<br>
+      <strong>Dracofeu</strong> et souffler du feu ! 🐉
+    </div>
+    <button class="btn-suivant" style="display:block;margin-top:1rem" onclick="afficherTresor()">On a trouvé le trésor ! 🏆</button>
+  </div>
+
+  <!-- TRÉSOR FINAL -->
+  <div class="tresor-final" id="tresor-final">
+    <span class="tresor-emoji">🏆</span>
+    <div class="tresor-titre">Félicitations<br>Dresseur !</div>
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" style="width:120px;margin:1rem auto;display:block" alt="Pikachu">
+    <div class="tresor-texte">
+      Tu as trouvé le trésor de Léandre ! 🎉<br><br>
+      Tu es un vrai Maître Pokémon !<br>
+      Pikachu est très fier de toi ! ⚡<br><br>
+      <strong style="color:#FFD700">Joyeux anniversaire Léandre ! 🎂</strong>
+    </div>
+  </div>
+
+  <a href="index.html" class="lien-retour">← Retour à l'invitation</a>
+
+</div>
+
+<script>
+  // Étoiles
+  const bg = document.getElementById('bg');
+  for (let i = 0; i < 80; i++) {
+    const e = document.createElement('div');
+    e.className = 'etoile';
+    const s = Math.random() * 3 + 1;
+    e.style.cssText = `width:${s}px;height:${s}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${1.5+Math.random()*2}s;`;
+    bg.appendChild(e);
+  }
+
+  const bonnesReponses = { 1: 'Pikachu', 2: 'Dracofeu', 3: 'Mew' };
+
+  function repondre(num, reponse, btn) {
+    const bonne = bonnesReponses[num];
+    if (reponse === bonne) {
+      btn.classList.add('correct');
+      // Révèle le Pokémon
+      document.getElementById('img-' + num).classList.add('revele');
+      // Désactive tous les boutons
+      btn.closest('.carte-enigme').querySelectorAll('.btn-reponse').forEach(b => b.disabled = true);
+      // Affiche le succès
+      const succes = document.getElementById('succes-' + num);
+      succes.style.display = 'block';
+      document.getElementById('btn-' + (num + 1)).style.display = 'block';
+      // Met à jour la progression
+      document.getElementById('prog-' + num).classList.remove('active');
+      document.getElementById('prog-' + num).classList.add('done');
+      document.getElementById('prog-' + num).textContent = '✓';
+      document.getElementById('ligne-' + num).classList.add('done');
+      document.getElementById('prog-' + (num + 1)).classList.add('active');
+    } else {
+      btn.classList.add('incorrect');
+      setTimeout(() => btn.classList.remove('incorrect'), 600);
+    }
+  }
+
+  function afficherEnigme(num) {
+    document.getElementById('enigme-' + num).style.display = 'block';
+    document.getElementById('enigme-' + num).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function afficherIndice(num) {
+    if (num === 1) {
+      document.getElementById('prog-4').classList.add('active');
+      document.getElementById('ligne-3').classList.add('done');
+    }
+    document.getElementById('indice-physique-' + num).style.display = 'block';
+    document.getElementById('indice-physique-' + num).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (num === 1) {
+      document.getElementById('prog-4').classList.remove('active');
+      document.getElementById('prog-4').classList.add('done');
+      document.getElementById('prog-4').textContent = '✓';
+      document.getElementById('ligne-4').classList.add('done');
+      document.getElementById('prog-5').classList.add('active');
+    }
+  }
+
+  function afficherTresor() {
+    document.getElementById('prog-5').classList.remove('active');
+    document.getElementById('prog-5').classList.add('done');
+    document.getElementById('prog-5').textContent = '✓';
+    document.getElementById('ligne-5').classList.add('done');
+    document.getElementById('prog-6').classList.add('active');
+    document.getElementById('prog-6').textContent = '🏆';
+    document.getElementById('tresor-final').style.display = 'block';
+    document.getElementById('tresor-final').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+</body>
+</html>

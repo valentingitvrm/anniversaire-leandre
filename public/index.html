@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anniversaire de Léandre 🎉</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: #1a1a2e; min-height: 100vh; overflow-x: hidden; }
+
+    .bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+      background: linear-gradient(160deg, #0f0c29, #302b63, #24243e);
+    }
+
+    /* Étoiles */
+    .etoile { position: absolute; background: white; border-radius: 50%; animation: scintiller 2s infinite alternate; }
+    @keyframes scintiller { from { opacity: 0.2; } to { opacity: 1; } }
+
+    /* Header */
+    .header { text-align: center; padding: 2.5rem 1rem 1rem; position: relative; }
+
+    .titre-pokemon {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.9rem, 3vw, 1.4rem);
+      color: #FFD700;
+      text-shadow: 4px 4px 0 #8B6914, 0 0 40px #FFD70088;
+      line-height: 2;
+      margin-bottom: 0.5rem;
+    }
+
+    .age-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #FF6B35, #FF0000);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      padding: 8px 24px;
+      border-radius: 99px;
+      border: 3px solid #FFD700;
+      box-shadow: 0 4px 20px rgba(255,107,53,0.5);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Pokémons défilants */
+    .pokemons-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
+
+    .pokemon-card {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 16px;
+      padding: 0.8rem;
+      text-align: center;
+      width: 110px;
+      transition: transform 0.3s, border-color 0.3s;
+      animation: flotter 3s ease-in-out infinite;
+    }
+    .pokemon-card:hover { transform: translateY(-8px) scale(1.05); border-color: #FFD700; }
+    .pokemon-card:nth-child(2) { animation-delay: 0.4s; }
+    .pokemon-card:nth-child(3) { animation-delay: 0.8s; }
+    .pokemon-card:nth-child(4) { animation-delay: 1.2s; }
+    .pokemon-card:nth-child(5) { animation-delay: 1.6s; }
+    @keyframes flotter { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+    .pokemon-card img { width: 80px; height: 80px; image-rendering: pixelated; }
+    .pokemon-name { font-size: 0.7rem; font-weight: 900; color: #FFD700; margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Carte invitation */
+    .carte {
+      max-width: 580px;
+      margin: 0 auto 2rem;
+      padding: 0 1rem;
+    }
+
+    .carte-interieur {
+      background: rgba(255,255,255,0.05);
+      border: 3px solid #FFD700;
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 0 40px rgba(255,215,0,0.2), inset 0 0 40px rgba(255,215,0,0.03);
+    }
+
+    /* Pokéball déco en arrière-plan */
+    .pokeball-bg {
+      position: absolute;
+      right: -30px; top: -30px;
+      width: 150px; height: 150px;
+      opacity: 0.05;
+    }
+
+    .carte-interieur { position: relative; overflow: hidden; }
+
+    /* Infos */
+    .infos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+
+    .info-bloc {
+      background: rgba(255,215,0,0.08);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 14px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .info-emoji { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+    .info-label { font-size: 0.7rem; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; }
+    .info-valeur { font-size: 0.95rem; font-weight: 900; color: white; margin-top: 0.2rem; }
+
+    /* Message */
+    .message {
+      color: #e2e8f0;
+      font-size: 1rem;
+      line-height: 1.8;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      border-left: 4px solid #FFD700;
+    }
+    .message strong { color: #FFD700; }
+
+    /* Types Pokémon déco */
+    .types {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .type-badge {
+      padding: 4px 14px;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .type-feu { background: #FF6B35; color: white; }
+    .type-eau { background: #6390F0; color: white; }
+    .type-plante { background: #7AC74C; color: white; }
+    .type-electrik { background: #F7D02C; color: #333; }
+    .type-psy { background: #F95587; color: white; }
+
+    /* Formulaire */
+    .formulaire { display: flex; flex-direction: column; gap: 1rem; }
+
+    .input-prenom {
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,215,0,0.4);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-size: 1rem;
+      font-family: 'Nunito', sans-serif;
+      text-align: center;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .input-prenom::placeholder { color: rgba(255,255,255,0.4); }
+    .input-prenom:focus { outline: none; border-color: #FFD700; background: rgba(255,215,0,0.08); }
+
+    .boutons-reponse { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .btn {
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.2);
+      transition: left 0.3s;
+    }
+    .btn:hover::after { left: 100%; }
+    .btn:hover { transform: translateY(-3px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-oui {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 4px 20px rgba(34,197,94,0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .btn-non {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    /* Confirmation */
+    .confirmation {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+      border-radius: 16px;
+      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+    .confirmation.oui { background: rgba(34,197,94,0.12); border: 2px solid #22c55e; }
+    .confirmation.non { background: rgba(239,68,68,0.12); border: 2px solid #ef4444; }
+    .confirmation-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+    .confirmation-img { width: 100px; margin: 0.5rem auto; display: block; image-rendering: pixelated; }
+    .confirmation-texte { color: white; font-size: 1.1rem; font-weight: 900; }
+
+    /* Lien chasse */
+    .lien-chasse { text-align: center; margin: 0 auto 3rem; max-width: 580px; padding: 0 1rem; }
+
+    .btn-chasse {
+      display: block;
+      padding: 18px 32px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      text-decoration: none;
+      border-radius: 16px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      box-shadow: 0 4px 25px rgba(139,92,246,0.5);
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-chasse:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(139,92,246,0.6); }
+
+    .footer { text-align: center; padding: 2rem; color: rgba(255,255,255,0.25); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+<!-- Écran mot de passe -->
+<div id="ecran-mdp" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a1a;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;">
+  <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" style="width:120px;animation:rebondir 1.5s ease-in-out infinite">
+  <div style="font-family:'Press Start 2P',monospace;font-size:0.9rem;color:#FFD700;text-align:center;line-height:2;text-shadow:3px 3px 0 #8B6914">Entre le mot de passe<br>secret Pokémon !</div>
+  <input id="input-mdp" type="password" placeholder="Mot de passe..." style="padding:14px 20px;border-radius:12px;border:2px solid rgba(255,215,0,0.4);background:rgba(255,255,255,0.08);color:white;font-size:1rem;font-family:'Nunito',sans-serif;text-align:center;width:260px;outline:none">
+  <button onclick="verifierMdp()" style="padding:14px 32px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a2e;border:none;border-radius:12px;font-size:1rem;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer">⚡ Entrer !</button>
+  <div id="erreur-mdp" style="color:#ef4444;font-size:0.9rem;display:none">❌ Mauvais mot de passe !</div>
+</div>
+<div class="bg" id="bg"></div>
+
+<div class="header">
+  <div class="titre-pokemon">🎉 Léandre<br>fête ses 6 ans ! 🎉</div>
+  <div class="age-badge">⚡ Fête Pokémon ⚡</div>
+</div>
+
+<!-- Pokémons -->
+<div class="pokemons-row" id="pokemons-row">
+  <div class="pokemon-card">
+    <img id="img-bulbizarre" src="" alt="Bulbizarre">
+    <div class="pokemon-name">Bulbizarre</div>
+  </div>
+  <div class="pokemon-card">
+    <img id="img-pikachu" src="" alt="Pikachu">
+    <div class="pokemon-name">Pikachu</div>
+  </div>
+  <div class="pokemon-card">
+    <img id="img-salameche" src="" alt="Salamèche">
+    <div class="pokemon-name">Salamèche</div>
+  </div>
+  <div class="pokemon-card">
+    <img id="img-mew" src="" alt="Mew">
+    <div class="pokemon-name">Mew</div>
+  </div>
+  <div class="pokemon-card">
+    <img id="img-dracofeu" src="" alt="Dracofeu">
+    <div class="pokemon-name">Dracofeu</div>
+  </div>
+</div>
+
+<!-- Carte invitation -->
+<div class="carte">
+  <div class="carte-interieur">
+
+    <!-- Pokéball bg -->
+    <svg class="pokeball-bg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" fill="white"/>
+      <path d="M2 50 Q2 2 50 2 Q98 2 98 50Z" fill="#FF0000"/>
+      <rect x="2" y="47" width="96" height="6" fill="#333"/>
+      <circle cx="50" cy="50" r="12" fill="white" stroke="#333" stroke-width="3"/>
+    </svg>
+
+    <div class="infos">
+      <div class="info-bloc">
+        <span class="info-emoji">📅</span>
+        <div class="info-label">Date</div>
+        <div class="info-valeur">20 Avril 2025</div>
+      </div>
+      <div class="info-bloc">
+        <span class="info-emoji">⏰</span>
+        <div class="info-label">Heure</div>
+        <div class="info-valeur">14h00</div>
+      </div>
+      <div class="info-bloc">
+        <span class="info-emoji">📍</span>
+        <div class="info-label">Lieu</div>
+        <div class="info-valeur">Arène Pokémon</div>
+      </div>
+      <div class="info-bloc">
+        <span class="info-emoji">🎂</span>
+        <div class="info-label">Pour qui</div>
+        <div class="info-valeur">Léandre, 6 ans</div>
+      </div>
+    </div>
+
+    <div class="message">
+      Salut Dresseur ! 👋<br><br>
+      Tu es invité(e) à la grande fête Pokémon de <strong>Léandre</strong> !
+      Au programme : jeux, chasse au trésor Pokémon,
+      et plein de surprises. Attrape-les tous ! 🎮<br><br>
+      <strong>Confirme ta présence ci-dessous ⬇️</strong>
+    </div>
+
+    <div class="types">
+      <span class="type-badge type-feu">🔥 Feu</span>
+      <span class="type-badge type-eau">💧 Eau</span>
+      <span class="type-badge type-plante">🌿 Plante</span>
+      <span class="type-badge type-electrik">⚡ Électrik</span>
+      <span class="type-badge type-psy">🔮 Psy</span>
+    </div>
+
+    <div class="formulaire" id="formulaire">
+      <input type="text" class="input-prenom" id="prenom" placeholder="✏️ Ton prénom de Dresseur..." maxlength="30">
+      <div class="boutons-reponse">
+        <button class="btn btn-oui" onclick="repondre('oui')">🎉 Je participe !</button>
+        <button class="btn btn-non" onclick="repondre('non')">😢 Je ne peux pas</button>
+      </div>
+    </div>
+
+    <div class="confirmation" id="confirmation"></div>
+
+  </div>
+</div>
+
+<!-- Chasse au trésor -->
+<div class="lien-chasse">
+  <a href="chasse.html" class="btn-chasse">🗺️ Voir la Chasse au Trésor Pokémon !</a>
+</div>
+
+<div class="footer">Fait avec ❤️ pour Léandre — Attrapez-les tous !</div>
+
+<script>
+  // Étoiles
+  const bg = document.getElementById('bg');
+  for (let i = 0; i < 100; i++) {
+    const e = document.createElement('div');
+    e.className = 'etoile';
+    const s = Math.random() * 3 + 1;
+    e.style.cssText = `width:${s}px;height:${s}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${1.5+Math.random()*2}s;`;
+    bg.appendChild(e);
+  }
+
+  // Charge les images depuis PokeAPI
+  const pokemons = [
+    { id: 'bulbizarre', num: 1 },
+    { id: 'pikachu',    num: 25 },
+    { id: 'salameche',  num: 4 },
+    { id: 'mew',        num: 151 },
+    { id: 'dracofeu',   num: 6 },
+  ];
+
+  pokemons.forEach(p => {
+    const img = document.getElementById('img-' + p.id);
+    img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.num}.png`;
+    img.style.imageRendering = 'auto';
+  });
+
+  async function repondre(choix) {
+    const prenom = document.getElementById('prenom').value.trim();
+    if (!prenom) {
+      const input = document.getElementById('prenom');
+      input.focus();
+      input.style.borderColor = '#ef4444';
+      input.placeholder = '⚠️ Écris ton prénom d\'abord !';
+      setTimeout(() => {
+        input.style.borderColor = '';
+        input.placeholder = '✏️ Ton prénom de Dresseur...';
+      }, 1500);
+      return;
+    }
+
+    try {
+      await fetch('/repondre', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prenom, reponse: choix })
+      });
+    } catch(e) { console.error(e); }
+
+    document.getElementById('formulaire').style.display = 'none';
+    const conf = document.getElementById('confirmation');
+    conf.className = `confirmation ${choix}`;
+    conf.style.display = 'block';
+
+    if (choix === 'oui') {
+      conf.innerHTML = `
+        <span class="confirmation-emoji">🎉</span>
+        <img class="confirmation-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu">
+        <div class="confirmation-texte">Super ${prenom} !<br>Pikachu est content de te voir ! ⚡</div>
+      `;
+    } else {
+      conf.innerHTML = `
+        <span class="confirmation-emoji">😢</span>
+        <img class="confirmation-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png" alt="Psykokwak">
+        <div class="confirmation-texte">Dommage ${prenom}...<br>Psykokwak est triste ! 💧</div>
+      `;
+    }
+  }
+  function verifierMdp() {
+  const mdp = document.getElementById('input-mdp').value;
+  if (mdp === 'leandre6ans!') {
+    document.getElementById('ecran-mdp').style.display = 'none';
+  } else {
+    document.getElementById('erreur-mdp').style.display = 'block';
+    document.getElementById('input-mdp').value = '';
+    document.getElementById('input-mdp').style.borderColor = '#ef4444';
+    setTimeout(() => {
+      document.getElementById('input-mdp').style.borderColor = '';
+      document.getElementById('erreur-mdp').style.display = 'none';
+    }, 2000);
+  }
+}
+
+// Permet d'appuyer sur Entrée
+document.getElementById('input-mdp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifierMdp();
+});
+</script>
+</body>
+</html>
